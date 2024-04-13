@@ -1,6 +1,6 @@
-package u06.examples
+package scala.u06.examples
 
-import u06.modelling.System
+import scala.u06.modelling.System
 
 object SystemMutualExclusion:
 
@@ -8,13 +8,13 @@ object SystemMutualExclusion:
     case N, T, C
 
   export State.*
-  export u06.modelling.SystemAnalysis.*
+  export scala.u06.modelling.SystemAnalysis.*
 
   type States = List[State]
 
   // helper
   private def move(l: States)(from: State, to: State): Set[States] =
-    (0 until l.size).toSet.collect:
+    l.indices.toSet.collect:
       case i if l(i) == from => l.updated(i, to)
 
   // System specification, try to capture the abstraction a bit

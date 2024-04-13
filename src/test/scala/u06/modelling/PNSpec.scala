@@ -1,11 +1,11 @@
-package u06.modelling
+package scala.u06.modelling
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 
 class PNSpec extends AnyFunSuite:
 
-  import u06.examples.PNMutualExclusion.*
+  import scala.u06.examples.PNMutualExclusion.*
 
   test("PN for mutual exclusion should properly generate 7-length paths"):
 

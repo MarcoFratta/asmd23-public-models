@@ -1,17 +1,18 @@
-package u06.examples
+package scala.u06.examples
 
-export u06.modelling.PetriNet
-import u06.utils.MSet
+export scala.u06.modelling.PetriNet
+import scala.u06.modelling.PriorityNet
+import scala.u06.modelling.PriorityNet.{<>, TrnWithPriority}
+import scala.u06.utils.MSet
 
 object PNMutualExclusion:
-
   enum Place:
     case N, T, C
     
   export Place.*
-  export u06.modelling.PetriNet.*
-  export u06.modelling.SystemAnalysis.*
-  export u06.utils.MSet
+  export scala.u06.modelling.PetriNet.*
+  export scala.u06.modelling.SystemAnalysis.*
+  export scala.u06.utils.MSet
 
   // DSL-like specification of a Petri Net
   def pnME = PetriNet[Place](

@@ -1,4 +1,4 @@
-package u06.modelling
+package scala.u06.modelling
 
 // Basical analysis helpers
 object SystemAnalysis:
@@ -16,10 +16,18 @@ object SystemAnalysis:
       case 0 => LazyList()
       case 1 => LazyList(List(s))
       case _ =>
+        def printAndReturn(path: Path[S], next: S) = {
+          val r = path :+ next
+          //println("Path: " + path.mkString(" -> "))
+          //println("Next state: " + next)
+          //println("Concatenated path: " + r.mkString(" -> ") + "\n  ")
+          r
+        }
+
         for
           path <- paths(s, depth - 1)
           next <- system.next(path.last)
-        yield path :+ next
+        yield printAndReturn(path, next)
 
     // complete paths with length '<= depth' (could be optimised)
     def completePathsUpToDepth(s: S, depth:Int): Seq[Path[S]] =
