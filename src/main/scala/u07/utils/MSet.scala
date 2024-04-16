@@ -1,4 +1,4 @@
-package u07.utils
+package scala.u07.utils
 
 // A multiset datatype
 trait MSet[A] extends (A => Int):

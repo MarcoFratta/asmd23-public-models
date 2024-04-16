@@ -1,4 +1,4 @@
-package u07.modelling
+package scala.u07.modelling
 
 import scala.util.Random
 

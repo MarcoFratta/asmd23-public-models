@@ -1,7 +1,7 @@
 package scala.u06.utils
 
 // A multiset datatype
-trait MSet[+A]:
+trait MSet[+A] extends Iterable[A]:
   def union[B >: A](m: MSet[B]): MSet[B]
   def diff[B >: A](m: MSet[B]): MSet[A]
   def disjoined[B >: A](m: MSet[B]): Boolean

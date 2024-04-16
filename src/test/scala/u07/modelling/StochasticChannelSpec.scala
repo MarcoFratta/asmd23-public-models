@@ -1,11 +1,11 @@
-package u07.modelling;
+package scala.u07.modelling;
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 
 class StochasticChannelSpec extends AnyFunSuite:
 
-  import u07.examples.StochasticChannel.*
+  import scala.u07.examples.StochasticChannel.*
 
   test("Stochastic channel should correctly draw transitions") {
     stocChannel.transitions(IDLE) shouldBe Set(Action(1.0, SEND))

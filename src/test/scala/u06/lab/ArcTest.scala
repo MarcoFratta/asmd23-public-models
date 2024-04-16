@@ -3,7 +3,7 @@ package scala.u06.lab
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 
-import scala.u06.lab.PetriNet.{Box, Token}
+import scala.u06.lab.PetriNetApi.{Box, Token, box}
 import scala.u06.lab.PetriNetFacade.CPN.{anonMarking, marking}
 
 class ArcTest extends AnyFunSuite:
@@ -14,22 +14,29 @@ class ArcTest extends AnyFunSuite:
 
   test("An arc should not be enabled if the condition is not satisfied"):
 
-    val arc = "S1" <-- Value
-    arc._2.isDefinedAt(token(Empty)) shouldBe false
-    arc._2.isDefinedAt(token(Value)) shouldBe true
+    token(Value) == token(Value) shouldBe true
+    val arc = moveToken(token(Value))
+    arc.isDefinedAt(box(token(Empty))) shouldBe false
+    arc.isDefinedAt(box(token(Value))) shouldBe true
 
 
   test("Move n token should work") {
     val arc = moveNToken(3)
-    arc(noIdToken) shouldBe (>(), >(noIdToken, noIdToken, noIdToken))
+    arc.flatMap(_(box(noIdToken))) shouldBe >(noIdToken, noIdToken, noIdToken)
 
     val arc2 = moveNToken(2)
-    arc2(noIdToken) shouldBe(>(), >(noIdToken, noIdToken))
+    arc2.flatMap(_(box(noIdToken))) shouldBe >(noIdToken, noIdToken)
   }
 
   test("Move a token of type T should work"):
     val arc = ~+((p:(Int,String)) => >(p._1 -> "n", p._2 -> "p"))
     val t =
-    arc.isDefinedAt(token((5, "pazza"))) shouldBe true
-    arc(token((5, "pazza"))) shouldBe (>(), >(token(5, "n"), token("pazza", "p"), token((5,"pazza"))))
+    arc.isDefinedAt(box(token((5, "pizza")))) shouldBe true
+    arc(box(token((5, "pizza")))) shouldBe  >(token(5, "n"), token("pizza", "p"), token((5,"pizza")))
 
+  test("Type extractor should work"):
+    val arc = <>[String]
+    arc.isDefinedAt(box(token("pizza"))) shouldBe true
+    arc.isDefinedAt(box(token(3))) shouldBe false
+    println(arc(box(token(3.0), token("ok"))))
+    arc.isDefinedAt(box(token(3.0), token("ok"))) shouldBe true

@@ -1,9 +1,8 @@
 package scala.u06.examples
 
-export scala.u06.modelling.PetriNet
-import scala.u06.modelling.PriorityNet
-import scala.u06.modelling.PriorityNet.{<>, TrnWithPriority}
+
 import scala.u06.utils.MSet
+import scala.u06.modelling.PetriNet
 
 object PNMutualExclusion:
   enum Place:

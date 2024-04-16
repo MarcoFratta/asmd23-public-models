@@ -6,7 +6,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "course-asmd23-models",
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.12" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.18" % Test,
       "org.scalacheck" %% "scalacheck" % "1.17.0"
     ),
     Compile / scalaSource := baseDirectory.value / "src" / "main",

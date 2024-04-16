@@ -1,7 +1,7 @@
-package u07.modelling
+package scala.u07.modelling
 
-import u07.utils.MSet
-import u07.modelling.CTMC.*
+import scala.u07.utils.MSet
+import scala.u07.modelling.CTMC.*
 
 object SPN:
 

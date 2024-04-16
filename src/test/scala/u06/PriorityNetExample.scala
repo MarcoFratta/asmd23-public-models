@@ -1,8 +1,8 @@
 package scala.u06
 
-import scala.u06.lab.PetriNet.Marking
+import scala.u06.lab.PetriNetApi.Marking
 import scala.u06.lab.PetriNetFacade
-import PetriNetFacade.{PPN}
+import PetriNetFacade.PPN
 
 object PriorityNetExample:
 

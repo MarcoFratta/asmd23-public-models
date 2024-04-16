@@ -1,4 +1,4 @@
-package u07.examples
+package scala.u07.examples
 
 import u07.modelling.CTMC
 

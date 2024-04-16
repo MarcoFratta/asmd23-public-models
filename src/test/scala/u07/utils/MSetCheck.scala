@@ -1,4 +1,4 @@
-package u07.utils
+package scala.u07.utils
 
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll

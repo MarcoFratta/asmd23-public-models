@@ -1,7 +1,7 @@
-package u07.examples
+package scala.u07.examples
 
-import u07.modelling.{CTMC, SPN}
-import u07.utils.MSet
+import scala.u07.modelling.{CTMC, SPN}
+import scala.u07.utils.MSet
 import java.util.Random
 
 object StochasticMutualExclusion extends App:
@@ -10,8 +10,8 @@ object StochasticMutualExclusion extends App:
     case N,T,C
 
   export Place.*
-  export u07.modelling.CTMCSimulation.*
-  export u07.modelling.SPN.*
+  export scala.u07.modelling.CTMCSimulation.*
+  export scala.u07.modelling.SPN.*
 
   val spn = SPN[Place](
     Trn(MSet(N), m => 1.0,   MSet(T),  MSet()),
