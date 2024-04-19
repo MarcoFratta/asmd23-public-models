@@ -1,6 +1,6 @@
-package u08.examples
+package scala.u08.examples
 
-import u08.modelling.{CTMC, SPN}
+import scala.u08.modelling.{CTMC, SPN}
 import java.util.Random
 import scala.u08.utils.MSet
 

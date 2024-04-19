@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers.{should,be}
 
 
 import scala.u07.modelling.CTMCSimulation.Event
-import scala.u07.utils.CTMCUtils
 
 class AvgCheck extends AnyFunSuite:
 

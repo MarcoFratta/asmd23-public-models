@@ -99,7 +99,9 @@ object PetriNetFacade:
       @targetName("Set the condition arcs for a transition")
       def ~~>(name: String): Transition[I,Token[?]] =
         Transition.ofList[I,Token[?]](m, Map[Arc, I](), name)
-
+      @targetName("Create a transition with no name")
+      def ~~>(m2: Iterable[(Arc, I)]): Transition[I, Token[?]] =
+        Transition.ofList[I, Token[?]](m, m2.toMap, "")
     extension [I](t: Transition[I,Token[?]])
       @targetName("Set the effect arcs for a transition")
       def ~~>(m: Iterable[(Arc, I)]): Transition[I,Token[?]] =
@@ -111,7 +113,8 @@ object PetriNetFacade:
     extension (n: Int)
       @targetName("Create an arc that adds n times a certain token")
       def <>[T](v: T): Arc = addToken(n, token(v))
-      def -->[I](p: I): (Arc, I) = addToken(n, noValueToken) -> p
+      @targetName("Adds n tokens to the place p")
+      def +>[I](p: I): (Arc, I) = addToken(n, noValueToken) -> p
     extension (a: Arc)
       @targetName("Link an outgoing arc to a place")
       def -->[I](p: I): (Arc, I) = a -> p
@@ -122,19 +125,15 @@ object PetriNetFacade:
 
     extension [T](v: T)
       @targetName("Add a token to a place")
-      def +->[I](p: I): (Arc, I) = addToken(1, token(v)) -> p
+      def -->[I](p: I): (Arc, I) = addToken(1, token(v)) -> p
 
     extension [I,T](m:Seq[SystemAnalysis.Path[Marking[I,T]]])
       def prettyPrint:String = m.toList.map(x =>
       x.map(m => s"[${m.map(e => s"${e._1} -> ${e._2.mkString("{",",","}")}")
-          .mkString(" , ")}]")
-        .mkString(" <> ")
-      ).mkString("\n")
+          .mkString(" , ")}]").mkString(" <> ")).mkString("\n")
       def noTokenPrint:String = m.toList.map(x =>
         x.map(m =>  m.toList.flatMap((p,b) => List.fill(b.size)(p))
-            .mkString("[",",","]"))
-          .mkString(" <> ")
-      ).mkString("\n")
+            .mkString("[",",","]")).mkString(" <> ")).mkString("\n")
 
   object BasicPN:
     import PetriNetFacade.PNOperation.*
@@ -153,7 +152,7 @@ object PetriNetFacade:
           ((a, b) => a + b).map((i, n) => addToken(n, noValueToken) -> i )
         Transition.ofMap(condition, effect, "")
 
-    def markingOf[I](m:(I,Int)*):Map[I,Box] =
+    private def markingOf[I](m:(I,Int)*):Map[I,Box] =
       m.toList.map((i, n) => i -> List.fill(n)(noValueToken)).toMap
     def marking[I](m:I*):Map[I,Box] =
        markingOf(m.toList.counted.toList*)
@@ -179,8 +178,8 @@ object PetriNetFacade:
     export CPN.{apply => _, _}
     export PNetExtensions.PriorityNet.*
 
-    def apply[I](t: (Transition[I, Token[?]], Int)*): PetriNet[I] =
-      CPN(t.map((t,p) => t `withPriority` p)*)
+    def apply[I](t: (Transition[I, Token[?]], Int)*): PriorityPNet[I] =
+      PriorityPNet(t.map((t,p) => t `withPriority` p)*)
 
     extension [I](t: Transition[I, Token[?]])
       @targetName("Set the priority of the transition")

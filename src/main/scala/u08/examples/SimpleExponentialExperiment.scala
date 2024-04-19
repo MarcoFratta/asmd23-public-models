@@ -1,7 +1,7 @@
-package u08.examples
+package scala.u08.examples
 
-import u08.modelling.{CTMC, CTMCExperiment}
-import u08.modelling.CTMC.*
+import scala.u08.modelling.{CTMC, CTMCExperiment}
+import scala.u08.modelling.CTMC.*
 import scala.math.BigDecimal.double2bigDecimal
 import java.util.Random
 import scala.u08.utils.Time

@@ -3,16 +3,16 @@ package scala.u06.lab
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 
-import scala.u06.lab.PetriNetFacade.CPN
 import scala.u06.examples.CPn
 import scala.u06.lab.PetriNetApi.box
+import scala.u06.lab.PetriNetFacade.CPN
 import scala.u06.modelling.SystemAnalysis
 
 class CPNTest extends  AnyFunSuite:
+  import CPN.*
   import CPn.*
   import CPn.Place.*
   import SystemAnalysis.*
-  import CPN.*
 
   test("Communication protocol")
     val m = marking(
@@ -66,7 +66,7 @@ class CPNTest extends  AnyFunSuite:
       case A, B, C
 
     import Place.*
-    import Token.*
+
     import CPN.*
 
     val pNet = CPN[Place](
@@ -96,11 +96,12 @@ class CPNTest extends  AnyFunSuite:
     enum Token:
       case BOOK, PAPER
 
-    import CPN.*
-    import Token.*
     import Place.*
+    import Token.*
+
+    import CPN.*
     val pNet = CPN(
-      (A <-- 2) ~~> "T1" ~~> >(2 --> B)
+      (A <-- 2) ~~> >(2 --> B)
     ).toSystem
 
     val m = anonMarking(
@@ -117,3 +118,26 @@ class CPNTest extends  AnyFunSuite:
       B -> box())
     val res2 = pNet.paths(m2, 2)
     res2.size should be(0)
+
+  test("Move same packet"):
+    enum Place:
+      case A, B, C
+
+    import Place.*
+
+    import CPN.*
+
+    val pNet = CPN[Place](
+      >(A <-- <>[Int]("n"),
+        A <-- <>[Int]("n"))
+        ~~> >(<>[Int]("n") --> B,
+              <>[Int]("n") --> B)
+    ).toSystem
+    val m = marking(
+      A -> >(2 -> "n", 2 -> "n"),
+      B -> >())
+
+    val expected = marking(A -> >(), B -> >(2 -> "n", 2 -> "n"))
+    val res = pNet.paths(m, 2)
+    println(res.prettyPrint)
+    res.last.last should be(expected)

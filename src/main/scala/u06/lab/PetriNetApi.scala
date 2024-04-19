@@ -49,18 +49,16 @@ object PetriNetApi:
     def name: String
 
 
-  case class PetriNet[I](transitions: Set[Transition[I,Token[?]]])
+  case class PetriNet[I](transitions: Iterable[Transition[I,Token[?]]])
 
-  def apply[I](t: Set[Transition[I,Token[?]]]): PetriNet[I] =
-    PetriNet(t)
   def apply[I](t: Transition[I,Token[?]]*): PetriNet[I] =
     PetriNet(t.toSet)
 
   extension [I](p: PetriNet[I])
     def toSystem: System[Marking[I,Token[?]]] = m =>
-      for t <- p.transitions
+      (for t <- p.transitions
           if t.isEnabled(m)
-      yield t.fire(m)
+      yield t.fire(m)).toSet
 
   object Transition:
 
@@ -76,8 +74,7 @@ object PetriNetApi:
         case head :: tail => val rec = combinationList[A](tail)
           rec.flatMap(r => head.map(t => t :: r))
       }
-      private def checkBindings(arcs :Map[Arc, Box]):
-      Iterable[Map[Arc, Token[?]]] =
+      private def checkBindings(arcs :Map[Arc, Box]): Iterable[Map[Arc, Token[?]]] =
         case class ArcToken(token: Token[?], box: Box)
         val tokensAfterFire = arcs.map((a, tokens) => a -> tokens.toList.map(t=> ArcToken(t, a(List(t)))))
         val combinations = combinationList(tokensAfterFire.toSeq.map((a,b) => b.map(a -> _)).toList)
@@ -96,7 +93,8 @@ object PetriNetApi:
       private def possibleScenarios(marking: Marking[I,T],
                                     places: Map[I, Iterable[Arc]],
                                     bindings:Iterable[Map[Arc,Token[?]]]):Iterable[Map[Arc,Token[?]]] =
-        val invalidScenarios = for scenario <- bindings
+        val invalidScenarios =
+          for scenario <- bindings
               p <- places.keys
               needed = places(p).map(a => scenario(a))
               b = marking.getOrElse(p, box())
@@ -126,11 +124,14 @@ object PetriNetApi:
           case true => place -> res.toSeq.diff(tokensToRemove(place).toSeq)
           case false => place -> res)
         val tokens = afterCondition.values.flatten.partition(_.getName.isEmpty)
-        val distinctTokens = tokens._1.toSeq ++ tokens._2.toSeq.distinctBy(_.getName)
-        val newOutPlaces = action.map((a, p) =>
+        val distinctTokens = tokens._1.toSeq ++ tokens._2.toSeq
+        println(distinctTokens)
+        println(action)
+        val newOutPlaces = action.toList.map((a, p) =>
           p -> newInPlaces.getOrElse(p, box()).concat(a.applyOrElse(distinctTokens, _ =>
           throw IllegalStateException(s"An out arc of transition ${this.toString} cannot be applied with" +
-            s" the tokes taken from InArcs")))) // can fail
+            s" the tokes taken from InArcs")))).groupMapReduce(_._1)(_._2)((b1,b2) => b1 ++ b2) // can fail
+        println(newOutPlaces)
         newInPlaces ++ newOutPlaces
 
     def apply[I,T](): Transition[I,T] = TransitionImpl(Map(), Map(), "")

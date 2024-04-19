@@ -2,7 +2,7 @@ package scala.u07.examples
 
 import java.util.Random
 import scala.u07.examples.StochasticChannel.*
-import scala.u07.utils.CTMCUtils.{avgTimeTo, percentageOfTimeIn}
+import scala.u07.lab.CTMCUtils.{avgTimeTo, percentageOfTimeIn}
 import scala.u07.utils.Time
 
 @main def mainStochasticChannelSimulation =

@@ -1,4 +1,4 @@
-package u08.modelling
+package scala.u08.modelling
 
 import scala.util.Random
 

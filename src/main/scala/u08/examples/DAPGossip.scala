@@ -1,9 +1,9 @@
-package u08.examples
+package scala.u08.examples
 
 import java.util.Random
 
-import u08.modelling.{CTMCSimulation, DAP, DAPGrid}
-import u08.modelling.CTMCSimulation.*
+import scala.u08.modelling.{CTMCSimulation, DAP, DAPGrid}
+import scala.u08.modelling.CTMCSimulation.*
 import scala.u08.utils.{Grids, MSet}
 
 object DAPGossip:

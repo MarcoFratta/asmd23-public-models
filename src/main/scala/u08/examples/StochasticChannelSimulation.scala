@@ -1,7 +1,7 @@
-package u08.examples
+package scala.u08.examples
 
 import java.util.Random
-import u08.examples.StochasticChannel.*
+import scala.u08.examples.StochasticChannel.*
 import scala.u08.utils.Time
 
 @main def mainStochasticChannelSimulation =

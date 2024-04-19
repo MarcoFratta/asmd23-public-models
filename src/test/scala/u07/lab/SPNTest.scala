@@ -7,9 +7,8 @@ import scala.u07.lab.SPN
 import scala.u07.lab.SPN.toCTMC
 import scala.u07.modelling.CTMCSimulation
 import java.util.Random
-import scala.u06.lab.Examples
+import scala.u06.examples.*
 import scala.u06.lab.PetriNetFacade.PNOperation.token
-import scala.u07.utils.CTMCUtils
 
 class SPNTest extends AnyFunSuite:
 
@@ -33,10 +32,9 @@ class SPNTest extends AnyFunSuite:
         .toList.mkString("\n")
 
   test("CPN to SPN"):
-    import Examples.ComPlace.*
     import scala.u06.lab.PetriNetFacade.CPN.marking
-
-    val cpn = Examples.comProtocol
+    import CPn.Place.*
+    val cpn = CPn.comProtocol
     val spn = cpn.toSpn(_ => 1.0, _ => 1.0, _ => 1.0, _ => 1.0, _ => 1.0)
 
     val m = marking(

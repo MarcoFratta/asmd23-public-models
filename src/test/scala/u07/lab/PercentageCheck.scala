@@ -4,8 +4,6 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import scala.u07.modelling.CTMCSimulation.Event
 
-import scala.u07.utils.CTMCUtils
-
 class PercentageCheck extends AnyFunSuite:
   import CTMCUtils.*
 

@@ -1,4 +1,4 @@
-package u08.modelling
+package scala.u08.modelling
 
 import java.util.Random
 
@@ -14,6 +14,8 @@ object CTMCExperiment:
     // globally is simply achieved by equivalence not G x= F not x
     def eventually[A](filt: A => Boolean): Property[A] =
       trace => trace exists (e => filt(e.state))
+
+    def always[A](filt: A => Boolean): Property[A] = !eventually(filt.andThen(!_))(_)
 
     // takes a property and makes it time bounded by the magics of streams
     def bounded[A](timeBound: Double)(prop: Property[A]): Property[A] =

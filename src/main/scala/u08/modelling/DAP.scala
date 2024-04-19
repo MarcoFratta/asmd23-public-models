@@ -1,7 +1,7 @@
-package u08.modelling
+package scala.u08.modelling
 
 import java.util.Random
-import CTMC.*
+import scala.u08.modelling.CTMC.*
 import scala.u08.utils.{Grids, MSet}
 
 // modules defining the concept of Distributed Asynchronous stochastic Petri net

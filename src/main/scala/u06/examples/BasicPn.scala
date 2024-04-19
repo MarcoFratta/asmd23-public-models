@@ -1,6 +1,5 @@
 package scala.u06.examples
 
-
 import scala.u06.lab.PetriNetFacade.BasicPN
 import scala.u06.modelling.SystemAnalysis
 

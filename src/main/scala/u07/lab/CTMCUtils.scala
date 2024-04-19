@@ -1,4 +1,4 @@
-package scala.u07.utils
+package scala.u07.lab
 
 import scala.u07.modelling.CTMCSimulation.{Event, Trace}
 

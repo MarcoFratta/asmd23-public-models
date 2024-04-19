@@ -1,5 +1,7 @@
 package scala.u06.examples
 
+import scala.u06.lab.PetriNetApi
+import scala.u06.lab.PetriNetApi.PetriNet
 import scala.u06.lab.PetriNetFacade.CPN
 
 object CPn:
@@ -18,12 +20,16 @@ object CPn:
   // Tells how a packet should be expanded to its components
   private val packet = ~+((p: Packet) => >(p._1 -> "n", p._2 -> "p"))
 
-  def comProtocol = CPN[Place](
-    >(SEND <-- packet, NS <-- <>[Int]("n")) ~~> "Send packet"
-      ~~> >(<>[Packet] --> A, <>[Packet] --> SEND, <>[Int]("n") --> NS),
+  def comProtocol: PetriNet[Place] = CPN[Place](
+    >(SEND <-- packet,
+      NS <-- <>[Int]("n")) ~~> "Send packet" ~~> >(
+      <>[Packet] --> A,
+      <>[Packet] --> SEND,
+      <>[Int]("n") --> NS),
     >(A <-- <>[Packet]) ~~> "Transmit packet" ~~> >(<>[Packet] --> B),
-    >(B <-- packet, NR <-- <>[Int]("n"), RECEIVED <-- <>[String]("str"))
-      ~~> "Receive packet" ~~> >(
+    >(B <-- packet,
+      NR <-- <>[Int]("n"),
+      RECEIVED <-- <>[String]("str")) ~~> "Receive packet" ~~> >(
       :~:[Int]("n")(_ + 1) --> C,
       :~:[Int]("n")(_ + 1) --> NR,
       >>[String](<>[String]("str"), <>[String]("p")) % (_ => "str") --> RECEIVED),

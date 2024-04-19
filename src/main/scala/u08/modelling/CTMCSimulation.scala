@@ -1,4 +1,4 @@
-package u08.modelling
+package scala.u08.modelling
 
 import java.util.Random
 import scala.u08.utils.Stochastics

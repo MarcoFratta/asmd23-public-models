@@ -21,7 +21,7 @@ object Pn:
     
 
 
-      // string can also be used as places
+  // string can also be used as places
    def rW = PN[String](
       >("p1") ~~> >("p2"),
       >("p2") ~~> >("p3"),
