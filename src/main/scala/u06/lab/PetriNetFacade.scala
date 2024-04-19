@@ -46,7 +46,8 @@ object PetriNetFacade:
 
     //private def outArcOf[T: ClassTag](f: Box => Box): Arc = (x: Box) => f(x)
 
-    def noIdToken: Token[NoId] = Token.Value(NoIdImpl(), "")
+    def noValueToken: Token[NoId] = Token.Value(NoIdImpl(), "")
+    def noIdToken[T](t:T):Token[T] = Token.Value(t, "")
     def token[T](t: T, name: String = ""): Token[T] = Token.Value(t, name)
     def addToken[T](n: Int, v:Token[T]): Arc = new PartialFunction[Box, Box]:
       override def isDefinedAt(x: Box): Boolean = true
@@ -110,6 +111,7 @@ object PetriNetFacade:
     extension (n: Int)
       @targetName("Create an arc that adds n times a certain token")
       def <>[T](v: T): Arc = addToken(n, token(v))
+      def -->[I](p: I): (Arc, I) = addToken(n, noValueToken) -> p
     extension (a: Arc)
       @targetName("Link an outgoing arc to a place")
       def -->[I](p: I): (Arc, I) = a -> p
@@ -124,17 +126,22 @@ object PetriNetFacade:
 
     extension [I,T](m:Seq[SystemAnalysis.Path[Marking[I,T]]])
       def prettyPrint:String = m.toList.map(x =>
-      x.map(v => s"[${v.map(e => s"${e._1} -> ${e._2.mkString("{",",","}")}")
+      x.map(m => s"[${m.map(e => s"${e._1} -> ${e._2.mkString("{",",","}")}")
           .mkString(" , ")}]")
         .mkString(" <> ")
+      ).mkString("\n")
+      def noTokenPrint:String = m.toList.map(x =>
+        x.map(m =>  m.toList.flatMap((p,b) => List.fill(b.size)(p))
+            .mkString("[",",","]"))
+          .mkString(" <> ")
       ).mkString("\n")
 
   object BasicPN:
     import PetriNetFacade.PNOperation.*
-    export PNOperation.>
+    export PNOperation.{>,prettyPrint, noTokenPrint}
 
-    def apply[I](t: Set[Transition[I, Token[?]]]): PetriNet[I] =
-      PetriNet[I](t)
+    def apply[I](t: Transition[I, Token[?]]*): PetriNet[I] =
+      PetriNet[I](t.toSet)
 
 
     extension [I](cond: Iterable[I])
@@ -143,21 +150,19 @@ object PetriNetFacade:
         val condition = cond.groupMapReduce(identity)(x => 1)
           ((a, b) => a + b).map((i, n) => i -> moveNToken(n))
         val effect = eff.groupMapReduce(identity)(x => 1)
-          ((a, b) => a + b).map((i, n) => addToken(n, noIdToken) -> i )
-        //println(s"condition: $condition")
-        //println(s"effect: $effect")
+          ((a, b) => a + b).map((i, n) => addToken(n, noValueToken) -> i )
         Transition.ofMap(condition, effect, "")
 
-    def marking[I](m:(I,Int)*):Map[I,Box] =
-      m.toList.map((i, n) => i -> List.fill(n)(noIdToken)).toMap
-    def marking[I](m:Iterable[I]):Map[I,Box] =
-      marking(m.toList.counted.toList*)
+    def markingOf[I](m:(I,Int)*):Map[I,Box] =
+      m.toList.map((i, n) => i -> List.fill(n)(noValueToken)).toMap
+    def marking[I](m:I*):Map[I,Box] =
+       markingOf(m.toList.counted.toList*)
 
   object PN:
     export BasicPN.{apply => _, _}
     export PNOperation.^^^
 
-    def apply[I](t: Transition[I, Token[?]]*): PetriNet[I] = BasicPN.apply(t.toSet)
+    def apply[I](t: Transition[I, Token[?]]*): PetriNet[I] = BasicPN.apply(t*)
 
   object CPN:
     export PNetExtensions.InhibitedTransition.*
@@ -175,7 +180,7 @@ object PetriNetFacade:
     export PNetExtensions.PriorityNet.*
 
     def apply[I](t: (Transition[I, Token[?]], Int)*): PetriNet[I] =
-      CPN(t.map((t,p) => t withPriority p)*)
+      CPN(t.map((t,p) => t `withPriority` p)*)
 
     extension [I](t: Transition[I, Token[?]])
       @targetName("Set the priority of the transition")

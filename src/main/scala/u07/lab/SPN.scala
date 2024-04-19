@@ -1,11 +1,9 @@
 package scala.u07.lab
 
-import scala.u07.modelling.CTMC
-import scala.u07.modelling.CTMC.Action
-
 import scala.u06.lab.PetriNetApi.Transition.TransitionImpl
 import scala.u06.lab.PetriNetApi.{PetriNet, Token, Transition}
-import scala.u06.modelling.PetriNet.Marking
+import scala.u07.modelling.CTMC
+import scala.u07.modelling.CTMC.Action
 import scala.u07.utils.MSet
 
 object SPN:
@@ -29,11 +27,9 @@ object SPN:
   def apply[I](transitions: TrnWithRate[I, Token[?]]*): SPNImpl[I] = SPNImpl(transitions*)
 
   import scala.u06.lab.PetriNetApi.*
-  import scala.u06.lab.PetriNetApi.Marking
   extension [I](spn: SPNImpl[I])
     def toCTMC: CTMC[Marking[I, Token[?]]] = m =>
           val mSet = m.toList.flatMap((i,b) => List.fill(b.size)(i))
-          print(s"mSet: $mSet")
           val marking = MSet.ofList(mSet)
           for TrnWithRate(t, rate) <- spn.transitions.toSet
               if t.isEnabled(m)

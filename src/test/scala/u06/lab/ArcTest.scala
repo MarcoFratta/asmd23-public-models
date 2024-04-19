@@ -22,10 +22,12 @@ class ArcTest extends AnyFunSuite:
 
   test("Move n token should work") {
     val arc = moveNToken(3)
-    arc.flatMap(_(box(noIdToken))) shouldBe >(noIdToken, noIdToken, noIdToken)
+    val b = box(3, token(Value))
+    arc.forall(_.isDefinedAt(box(token(Value)))) shouldBe true
+    arc.flatMap(_(b)) shouldBe >(token(Value), token(Value), token(Value))
 
     val arc2 = moveNToken(2)
-    arc2.flatMap(_(box(noIdToken))) shouldBe >(noIdToken, noIdToken)
+    arc2.flatMap(_(box(noValueToken))) shouldBe >(noValueToken, noValueToken)
   }
 
   test("Move a token of type T should work"):

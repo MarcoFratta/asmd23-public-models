@@ -8,10 +8,12 @@ import scala.u07.lab.SPN.toCTMC
 import scala.u07.modelling.CTMCSimulation
 import java.util.Random
 import scala.u06.lab.Examples
-
+import scala.u06.lab.PetriNetFacade.PNOperation.token
+import scala.u07.utils.CTMCUtils
 
 class SPNTest extends AnyFunSuite:
 
+  import CTMCUtils.*
   enum Place:
     case N, T, C
   import Place.*
@@ -26,7 +28,7 @@ class SPNTest extends AnyFunSuite:
 
 
     println:
-      toCTMC(spn).newSimulationTrace(marking(>(N, N, N, N)), new Random)
+      toCTMC(spn).newSimulationTrace(marking(N, N, N, N), new Random)
         .take(20)
         .toList.mkString("\n")
 
@@ -47,9 +49,18 @@ class SPNTest extends AnyFunSuite:
       RECEIVED -> >("" -> "str"),
     )
 
+
     println:
-      toCTMC(spn).newSimulationTrace(m, new Random)
-        .take(5)
-        .toList.mkString("\n")
+      val f = spn.toCTMC
+      val k = 0 to 1000 map (_ => f.newSimulationTrace(m, new Random).take(20))
+      val avgTime = avgTimeTo(k).andThen(roundAt(3))(m =>
+        m(RECEIVED) == >(token("sending a message", "str")))
+      val percentageOf = percentageOfTimeIn(k).andThen(roundAt(2))(m =>
+        m.applyOrElse(A ,_ => >()) == >(token((1,"sending"), "p1")))
+
+      "avg time to receive all the packets: " + avgTime + "\n" +
+        "% of time in receive ack state: " + percentageOf + "%"
+      + "\n" + k.last.mkString("\n")
+
 
 
