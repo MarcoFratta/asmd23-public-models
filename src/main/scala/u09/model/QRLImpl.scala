@@ -1,4 +1,4 @@
-package u09.model
+package  scala.u09.model
 
 import annotation.tailrec
 import collection.immutable

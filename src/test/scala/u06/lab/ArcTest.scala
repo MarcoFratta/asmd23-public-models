@@ -30,6 +30,16 @@ class ArcTest extends AnyFunSuite:
     arc2.flatMap(_(box(noValueToken))) shouldBe >(noValueToken, noValueToken)
   }
 
+  test("Add a token should work"):
+    Value shouldBe Value
+    val arc = 3 <> Value
+    val b = box(3, token(Value))
+    arc.isDefinedAt(box()) shouldBe true
+    println(arc(box()))
+    println(b)
+    arc(box()).forall(b.toSeq.contains(_)) shouldBe true
+    arc(box()).toSeq == b shouldBe true
+
   test("Move a token of type T should work"):
     val arc = ~+((p:(Int,String)) => >(p._1 -> "n", p._2 -> "p"))
     val t =

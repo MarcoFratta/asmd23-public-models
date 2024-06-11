@@ -141,3 +141,47 @@ class CPNTest extends  AnyFunSuite:
     val res = pNet.paths(m, 2)
     println(res.prettyPrint)
     res.last.last should be(expected)
+
+  test("Guard should work"):
+    enum Place:
+      case A, B, C
+
+    import Place.*
+
+    import CPN.*
+
+    val pNet = CPN[Place](
+      >(A <-- <>[Int]("n"),
+        A <-- <>[Int]("b"))
+        ~~> >(<>[Int]("n") --> B)  ?? {
+        ><[Int]("n") +
+        ><[Int]("b") <= 5}
+    ).toSystem
+    val m = marking(
+      A -> >(2 -> "n", 4 -> "b"),
+      B -> >())
+
+    val expected = marking(A -> >(), B -> >(2 -> "n"))
+    val res = pNet.paths(m, 2)
+    println(res.prettyPrint)
+    //res.last.last should be(expected)
+
+  test("</> should work"):
+    enum Place:
+      case A, B, C
+
+    import Place.*
+
+    import CPN.*
+
+    val pNet = CPN[Place](
+      (>(A <-- <>[Int]) ++ (3 </> (A <-- <>[Int]))) ~~> "A" ~~> >((3 ** <>[Int]) --> B)
+    )
+    val m = marking(List.fill(4)(A -> >(1 -> "n"))*)
+
+    val expected = marking(A -> >(), B -> List.fill(3)(1 -> "n"))
+    val res = pNet.toSystem.paths(m, 2)
+    println(pNet.transitions.head.condition)
+    println(m)
+    println(res.prettyPrint)
+    res.last.last should be(expected)

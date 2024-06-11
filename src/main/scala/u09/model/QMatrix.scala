@@ -1,4 +1,4 @@
-package u09.model
+package scala.u09.model
 
 object QMatrix:
 
@@ -10,8 +10,7 @@ object QMatrix:
 
   import Move.*
 
-  case class Facade(
-                     width: Int,
+  case class Facade(width: Int,
                      height: Int,
                      initial: Node,
                      terminal: PartialFunction[Node, Boolean],

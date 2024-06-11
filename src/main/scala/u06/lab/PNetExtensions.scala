@@ -15,14 +15,14 @@ object PNetExtensions:
 
     private case class Trn[I,T](transition: Transition[I,T], i:Set[I])
       extends Transition.TransitionImpl[I,T](transition.condition,
-        transition.action,transition.name) with inhibitorArcs[I,T](i)
+        transition.action,transition.name, true) with inhibitorArcs[I,T](i)
 
     def apply[I,T](t: Transition[I,T],i: Set[I]): Transition[I,T] = Trn(t, i)
 
   object PriorityNet:
     private[PriorityNet] case class PTrn[I, T](t: Transition[I, T], p: Int)
       extends Transition.TransitionImpl[I, T](t.condition,
-        t.action, t.name)
+        t.action, t.name, true)
 
 
     class PriorityPNet[I](val pTransitions: PTrn[I,Token[?]]*)
@@ -37,7 +37,7 @@ object PNetExtensions:
         val maxPriority:Int = enabledTransitions.maxByOption(_.p).map(_.p).getOrElse(0)
         (for PTrn(trn,priority) <- enabledTransitions
           if priority == maxPriority
-          yield trn.fire(m)).toSet
+          yield trn.fire(m)).flatten.toSet
      
 
 

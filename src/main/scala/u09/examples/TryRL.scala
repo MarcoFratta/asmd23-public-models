@@ -1,4 +1,4 @@
-package u09.examples
+package  scala.u09.examples
 
 import TwoWaysMDP.*
 

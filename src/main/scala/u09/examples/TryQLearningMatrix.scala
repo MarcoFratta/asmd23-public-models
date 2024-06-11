@@ -1,17 +1,17 @@
-package u09.examples
+package  scala.u09.examples
 
-import u09.model.QMatrix
+import  scala.u09.model.QMatrix
 
 object TryQMatrix extends App :
 
-  import u09.model.QMatrix.Move.*
-  import u09.model.QMatrix.*
+  import  scala.u09.model.QMatrix.Move.*
+  import  scala.u09.model.QMatrix.*
 
   val rl: QMatrix.Facade = Facade(
     width = 5,
     height = 5,
     initial = (0,0),
-    terminal = {case _=>false},
+    terminal = {case _=> false},
     reward = { case ((1,0),DOWN) => 10; case ((3,0),DOWN) => 5; case _ => 0},
     jumps = { case ((1,0),DOWN) => (1,4); case ((3,0),DOWN) => (3,2) },
     gamma = 0.9,

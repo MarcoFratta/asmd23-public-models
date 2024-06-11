@@ -11,10 +11,6 @@ object PetriNetApi:
     override def toString: String = this match
       case Token.Value(content, n) => if n.isEmpty then content.toString else s"$n: $content"
       case Token.Empty() => ""
-    override def equals(obj: Any): Boolean = obj match
-      case Token.Value(c, n) => n == this.getName && c == content
-      case Token.Empty() => false
-      case _ => false
 
   import Token.*
   extension [T: ClassTag](t: Token[T])
@@ -45,7 +41,7 @@ object PetriNetApi:
     def condition: Map[I, Iterable[Arc]]
     def action: Map[Arc, I]
     def isEnabled(m: Marking[I,T]): Boolean
-    def fire(m: Marking[I,T]): Marking[I,T]
+    def fire(m: Marking[I,T]): Iterable[Marking[I,T]]
     def name: String
 
 
@@ -58,26 +54,31 @@ object PetriNetApi:
     def toSystem: System[Marking[I,Token[?]]] = m =>
       (for t <- p.transitions
           if t.isEnabled(m)
-      yield t.fire(m)).toSet
+      yield t.fire(m).toSeq.distinct).flatten.toSet
 
   object Transition:
 
     class TransitionImpl[I, T](override val condition: Map[I, Iterable[Arc]],
                                             override val action: Map[Arc, I],
-                                            override val name: String) extends Transition[I, T]:
+                                            override val name: String,
+                               guard: Box ?=> Boolean) extends Transition[I, T]:
       override def toString: String = name match
         case "" => "T" + (condition.hashCode() + action.hashCode()) % 100
         case _ => name
 
       private def combinationList[A](ls: List[List[A]]): List[List[A]] = ls match {
         case Nil => Nil :: Nil
-        case head :: tail => val rec = combinationList[A](tail)
+        case head :: tail =>
+          val rec = combinationList[A](tail).distinct
           rec.flatMap(r => head.map(t => t :: r))
       }
-      private def checkBindings(arcs :Map[Arc, Box]): Iterable[Map[Arc, Token[?]]] =
+
+      private def checkBindings(arcs :List[(Arc, Box)]): Iterable[Map[Arc, Token[?]]] =
         case class ArcToken(token: Token[?], box: Box)
         val tokensAfterFire = arcs.map((a, tokens) => a -> tokens.toList.map(t=> ArcToken(t, a(List(t)))))
-        val combinations = combinationList(tokensAfterFire.toSeq.map((a,b) => b.map(a -> _)).toList)
+        //println("Computing combinations")
+        val combinations = combinationList(tokensAfterFire.map((a, b) => b.map(a -> _)))
+        //println("Finished computing " + combinations.size)
         combinations.filter(p => p.flatMap((a, arcToken) => arcToken.box
               .filter(_.getName.nonEmpty).toSeq).groupBy(_.getName).forall((_,tokens) => tokens.size match
               case 1 => true
@@ -85,10 +86,10 @@ object PetriNetApi:
               )).map(perm => perm.map((a, arcToken) =>
           a -> arcToken.token).toMap)
 
-      private def getValidArcs(m: Marking[I, T]): Map[Arc, Box] =
+      private def getValidArcs(m: Marking[I, T]): List[(Arc, Box)] =
         condition.toList.flatMap((p, arcs) => arcs.map(p -> _)).map((p, a) =>
           val tokens = m.getOrElse(p, box())
-          a -> tokens.filter(t => a.isDefinedAt(List(t)))).toMap
+          a -> tokens.filter(t => a.isDefinedAt(List(t))))
 
       private def possibleScenarios(marking: Marking[I,T],
                                     places: Map[I, Iterable[Arc]],
@@ -106,38 +107,47 @@ object PetriNetApi:
       override def isEnabled(m: Marking[I, T]): Boolean =
         // tutti le combinazioni arco -> lista di token cui è definito
         val validArcs = getValidArcs(m)
+        println("getting bindings")
         val c = checkBindings(validArcs)
+        println("finished " + c.size)
         val scenarios = possibleScenarios(m, condition, c)
-        validArcs.count((_, b) => b.nonEmpty) == condition.flatMap(_._2).size &&
-          scenarios.nonEmpty
+        val validScenarios = scenarios.filter(s => guard(using s.flatMap((a, t) => a(List(t)))))
+//        println(s"Valid scenarios: $validScenarios")
+//        println(s"Valid arcs: $validArcs")
+//        println(s"Bindings: $c")
+        validArcs.count((_, b) => b.nonEmpty) == condition.flatMap(_._2).size
+          && validScenarios.nonEmpty
 
 
-      override def fire(m: Marking[I, T]): Marking[I, T] =
+      override def fire(m: Marking[I, T]): Iterable[Marking[I, T]] =
         // assuming that all the arcs are valid (have at least one token that can fire the arc)
         val validArcs = getValidArcs(m)
-        val tokenToFire = checkBindings(validArcs).head //replace with random
-        val afterCondition = condition.map((p, arcs) =>
-          p -> arcs.flatMap(a => a(List(tokenToFire(a)))))
-        val tokensToRemove = condition.map((p, arcs) =>
-          p -> arcs.flatMap(a => Seq(tokenToFire(a))))
-        val newInPlaces = m.map((place, res) => condition.isDefinedAt(place) match
-          case true => place -> res.toSeq.diff(tokensToRemove(place).toSeq)
-          case false => place -> res)
-        val tokens = afterCondition.values.flatten.partition(_.getName.isEmpty)
-        val distinctTokens = tokens._1.toSeq ++ tokens._2.toSeq
-        println(distinctTokens)
-        println(action)
-        val newOutPlaces = action.toList.map((a, p) =>
-          p -> newInPlaces.getOrElse(p, box()).concat(a.applyOrElse(distinctTokens, _ =>
-          throw IllegalStateException(s"An out arc of transition ${this.toString} cannot be applied with" +
-            s" the tokes taken from InArcs")))).groupMapReduce(_._1)(_._2)((b1,b2) => b1 ++ b2) // can fail
-        println(newOutPlaces)
-        newInPlaces ++ newOutPlaces
+        val bindings = possibleScenarios(m, condition, checkBindings(validArcs))
+        val validScenarios = bindings.filter(s => guard(using s.flatMap((a, t) => a(List(t))))).toSeq
+        println(s"Valid scenarios: ${validScenarios.size}")
+        for scenario <- validScenarios
+          afterCondition = condition.map((p, arcs) =>
+            p -> arcs.flatMap(a => a(List(scenario(a)))))
+          tokensToRemove = condition.map((p, arcs) =>
+            p -> arcs.flatMap(a => Seq(scenario(a))))
+          newInPlaces = m.map((place, res) => condition.isDefinedAt(place) match
+            case true => place -> res.toSeq.diff(tokensToRemove(place).toSeq)
+            case false => place -> res)
+          distinctTokens = afterCondition.values.flatten
+//          println(distinctTokens)
+//          println(action)
+          newOutPlaces = action.toList.map((a, p) =>
+            p -> newInPlaces.getOrElse(p, box()).concat(a.applyOrElse(distinctTokens, _ =>
+            throw IllegalStateException(s"An out arc of transition ${this.toString} cannot be applied with" +
+              s" the tokes taken from InArcs")))).groupMapReduce(_._1)(_._2)((b1,b2) => b1 ++ b2) // can fail
+          //println(newOutPlaces)
+          yield newInPlaces ++ newOutPlaces
 
-    def apply[I,T](): Transition[I,T] = TransitionImpl(Map(), Map(), "")
-    def apply[I,T](name: String): Transition[I,T] = TransitionImpl(Map(), Map(), name)
-    def ofMap[I,T](condition: Map[I, Iterable[Arc]], action: Map[Arc, I], name: String): Transition[I,T] =
-      TransitionImpl(condition, action, name)
-    def ofList[I, T](condition: Iterable[(I, Arc)], action: Map[Arc, I], name: String): Transition[I, T] =
+    def apply[I,T](): Transition[I,T] = ofMap(Map(), Map(), "", true)
+    def apply[I,T](name: String): Transition[I,T] = ofMap(Map(), Map(), name,true)
+    def ofMap[I,T](condition: Map[I, Iterable[Arc]], action: Map[Arc, I], name: String,
+                   g: Box ?=> Boolean): Transition[I,T] = TransitionImpl(condition, action, name,g)
+    def ofList[I, T](condition: Iterable[(I, Arc)], action: Map[Arc, I], name: String,
+                     g: Box ?=> Boolean): Transition[I, T] =
       TransitionImpl(condition.groupMapReduce(_._1)(v => Seq(v._2))((x,y) => x ++ y),
-                    action,name)
+                    action,name, g)

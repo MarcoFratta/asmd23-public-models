@@ -1,6 +1,6 @@
-package u09.examples
+package scala.u09.examples
 
-import u09.model.QRLImpl
+import scala.u09.model.QRLImpl
 
 object TwoWaysMDP:
   case class Pos(n: Int)
@@ -26,6 +26,7 @@ object TwoWaysMDP:
         (Move.RIGHT, 1, penalty, if n == maxRight then Pos(n) else Pos(n + 1)))
 
     def qfTW() = QFunction(Move.values.toSet, 1.0, terminalTW)
+
     def rlTW() = QLearning(
       system = QSystem(mdpTW(), Pos(0), terminalTW),
       gamma = 0.9,

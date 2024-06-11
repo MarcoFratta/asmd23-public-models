@@ -21,6 +21,7 @@ object CTMCSimulation:
             val choices = self.transitions(s) map (t => (t.rate, t.state))
             val next = Stochastics.cumulative(choices.toList)
             val sumR = next.last._1
+            println(s"sum rates ${sumR} ")
             val choice = Stochastics.draw(next)(using rnd)
             Event(t + Math.log(1 / rnd.nextDouble()) / sumR, choice)
 

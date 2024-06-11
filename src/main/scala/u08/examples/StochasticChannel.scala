@@ -1,6 +1,6 @@
 package scala.u08.examples
 
-import scala.u08.modelling.CTMC
+import scala.u07.modelling.CTMC
 
 object StochasticChannel:
   enum State:

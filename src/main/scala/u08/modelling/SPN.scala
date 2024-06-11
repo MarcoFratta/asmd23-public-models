@@ -1,6 +1,7 @@
 package scala.u08.modelling
 
-import scala.u08.modelling.CTMC.*
+import scala.u07.modelling.CTMC
+import scala.u07.modelling.CTMC.*
 import scala.u08.utils.MSet
 
 object SPN:

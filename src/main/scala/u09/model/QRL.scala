@@ -1,7 +1,7 @@
-package u09.model
+package  scala.u09.model
 
-import u09.utils.Stochastics.{cumulative, draw}
-import u09.utils.Stochastics
+import  scala.u09.utils.Stochastics.{cumulative, draw}
+import  scala.u09.utils.Stochastics
 
 trait QRL:
   type State
